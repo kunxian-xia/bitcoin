@@ -1,0 +1,12 @@
+BERKELEYDB=C:\\Users\\xiaku\\db-18.1.25\\build_windows
+
+INCLUDE_DIR=$(BERKELEYDB)
+LIB_DIR=$(BERKELEYDB)\\x64\\Release
+
+all: main.exe
+
+main.exe: main.cpp
+    cl /EHsc /I $(INCLUDE_DIR) main.cpp /link /LIBPATH:$(LIB_DIR) libdb181.lib
+
+clean:
+    del /Q main.exe main.obj my_db.db
