@@ -15,10 +15,13 @@ D=d
 DEBUGFLAGS=-g -D__WXDEBUG__
 endif
 
+CXX=i686-w64-mingw32-g++
+WINDRES=i686-w64-mingw32-windres
 
-
-INCLUDEPATHS=-I"/boost" -I"/DB/build_unix" -I"/OpenSSL/include" -I"/wxWidgets/lib/vc_lib/mswd" -I"/wxWidgets/include"
-LIBPATHS=-L"/DB/build_unix" -L"/OpenSSL/out" -L"/wxWidgets/lib/gcc_lib"
+#INCLUDEPATHS=-I"/boost" -I"/DB/build_unix" -I"/OpenSSL/include" -I"/wxWidgets/lib/vc_lib/mswd" -I"/wxWidgets/include"
+#LIBPATHS=-L"/DB/build_unix" -L"/OpenSSL/out" -L"/wxWidgets/lib/gcc_lib"
+INCLUDEPATHS=-I /usr/share/bitcoin/include
+LIBPATHS=-L /usr/share/bitcoin/lib
 LIBS= \
  -l db_cxx \
  -l eay32 \
@@ -34,40 +37,40 @@ all: bitcoin.exe
 
 
 headers.h.gch: headers.h $(HEADERS) net.h irc.h market.h uibase.h ui.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/util.o: util.cpp		    $(HEADERS)
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/script.o: script.cpp	    $(HEADERS)
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/db.o: db.cpp		    $(HEADERS) market.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/net.o: net.cpp		    $(HEADERS) net.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/main.o: main.cpp		    $(HEADERS) net.h market.h sha.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/market.o: market.cpp	    $(HEADERS) market.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/ui.o: ui.cpp		    $(HEADERS) net.h uibase.h ui.h market.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/uibase.o: uibase.cpp	    uibase.h
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/sha.o: sha.cpp		    sha.h
-	g++ -c $(CFLAGS) -O3 -o $@ $<
+	$(CXX) -c $(CFLAGS) -O3 -o $@ $<
 
 obj/irc.o:  irc.cpp		    $(HEADERS)
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/ui_res.o: ui.rc  rc/bitcoin.ico rc/check.ico rc/send16.bmp rc/send16mask.bmp rc/send16masknoshadow.bmp rc/send20.bmp rc/send20mask.bmp rc/addressbook16.bmp rc/addressbook16mask.bmp rc/addressbook20.bmp rc/addressbook20mask.bmp
-	windres $(WXDEFS) $(INCLUDEPATHS) -o $@ -i $<
+	$(WINDRES) $(WXDEFS) $(INCLUDEPATHS) -o $@ -i $<
 
 
 
@@ -76,7 +79,7 @@ OBJS=obj/util.o obj/script.o obj/db.o obj/net.o obj/main.o obj/market.o	 \
 
 bitcoin.exe: headers.h.gch $(OBJS)
 	-kill /f bitcoin.exe
-	g++ $(CFLAGS) -mwindows -Wl,--subsystem,windows -o $@ $(LIBPATHS) $(OBJS) $(LIBS)
+	$(CXX) $(CFLAGS) -mwindows -Wl,--subsystem,windows -o $@ $(LIBPATHS) $(OBJS) $(LIBS)
 
 clean:
 	-del /Q obj\*

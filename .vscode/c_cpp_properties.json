@@ -4,7 +4,8 @@
             "name": "Linux",
             "compilerPath": "/usr/bin/x86_64-w64-mingw32-g++",
             "includePath": [
-                "/usr/share/mingw-w64/include"
+                "/usr/share/mingw-w64/include",
+                "/usr/share/bitcoin/include"
             ]
         }
     ],
