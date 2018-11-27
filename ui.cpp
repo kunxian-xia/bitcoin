@@ -1273,8 +1273,8 @@ CAboutDialog::CAboutDialog(wxWindow* parent) : CAboutDialogBase(parent)
 
     // Workaround until upgrade to wxWidgets supporting UTF-8
     wxString str = m_staticTextMain->GetLabel();
-    if (str.Find('Â') != wxNOT_FOUND)
-        str.Remove(str.Find('Â'), 1);
+    if (str.Find('ï¿½') != wxNOT_FOUND)
+        str.Remove(str.Find('ï¿½'), 1);
     m_staticTextMain->SetLabel(str);
 }
 
@@ -2697,7 +2697,8 @@ void CViewProductDialog::GetOrder(CWalletTx& wtx)
             strValue = m_textCtrlField[i]->GetValue().Trim();
         else
             strValue = m_choiceField[i]->GetStringSelection();
-        wtx.vOrderForm.push_back(make_pair(m_staticTextLabel[i]->GetLabel(), strValue));
+		
+        wtx.vOrderForm.push_back(make_pair(std::string(m_staticTextLabel[i]->GetLabel().mb_str()), strValue));
     }
 }
 
