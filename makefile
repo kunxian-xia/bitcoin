@@ -40,7 +40,7 @@ HEADERS=headers.h util.h main.h serialize.h uint256.h key.h bignum.h script.h db
 
 
 
-all: bitcoin.exe
+all: bin/bitcoin.exe
 
 
 headers.h.gch: headers.h $(HEADERS) net.h irc.h market.h uibase.h ui.h
@@ -84,11 +84,11 @@ obj/ui_res.o: ui.rc  rc/bitcoin.ico rc/check.ico rc/send16.bmp rc/send16mask.bmp
 OBJS=obj/util.o obj/script.o obj/db.o obj/net.o obj/main.o obj/market.o	 \
 	obj/ui.o obj/uibase.o obj/sha.o obj/irc.o obj/ui_res.o
 
-bitcoin.exe: headers.h.gch $(OBJS)
-	-kill /f bitcoin.exe
+bin/bitcoin.exe: headers.h.gch $(OBJS)
+	-kill /f bin/bitcoin.exe
 	$(CXX) $(CFLAGS) -mwindows -Wl,--subsystem,windows -o $@ $(LIBPATHS) $(OBJS) $(LIBS)
 
 clean:
 	-del /Q obj\*
-	-del /Q bitcoin.exe
+	-del /Q bin\*
 	-del /Q headers.h.gch
