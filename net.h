@@ -416,7 +416,7 @@ extern uint64 nLocalServices;
 extern CAddress addrLocalHost;
 extern CNode* pnodeLocalHost;
 extern bool fShutdown;
-extern array<bool, 10> vfThreadRunning;
+extern boost::array<bool, 10> vfThreadRunning;
 extern vector<CNode*> vNodes;
 extern CCriticalSection cs_vNodes;
 extern map<vector<unsigned char>, CAddress> mapAddresses;

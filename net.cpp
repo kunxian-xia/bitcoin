@@ -23,7 +23,7 @@ CAddress addrLocalHost(0, DEFAULT_PORT, nLocalServices);
 CNode nodeLocalHost(INVALID_SOCKET, CAddress("127.0.0.1", nLocalServices));
 CNode* pnodeLocalHost = &nodeLocalHost;
 bool fShutdown = false;
-array<bool, 10> vfThreadRunning;
+boost::array<bool, 10> vfThreadRunning;
 vector<CNode*> vNodes;
 CCriticalSection cs_vNodes;
 map<vector<unsigned char>, CAddress> mapAddresses;
