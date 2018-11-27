@@ -1,1 +1,4 @@
 .idea/
+.vs/
+obj/
+bitcoin.exe

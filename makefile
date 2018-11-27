@@ -15,13 +15,20 @@ D=d
 DEBUGFLAGS=-g -D__WXDEBUG__
 endif
 
-CXX=i686-w64-mingw32-g++
-WINDRES=i686-w64-mingw32-windres
-
 #INCLUDEPATHS=-I"/boost" -I"/DB/build_unix" -I"/OpenSSL/include" -I"/wxWidgets/lib/vc_lib/mswd" -I"/wxWidgets/include"
 #LIBPATHS=-L"/DB/build_unix" -L"/OpenSSL/out" -L"/wxWidgets/lib/gcc_lib"
+ifeq "$(OS)" "Windows"
+CXX=g++
+WINDRES=windres
+INCLUDEPATHS=-I"C:/Bitcoin/include"
+LIBPATHS=-L "C:/Bitcoin/lib"
+else 
+CXX=i686-w64-mingw32-g++
+WINDRES=i686-w64-mingw32-windres
 INCLUDEPATHS=-I /usr/share/bitcoin/include
 LIBPATHS=-L /usr/share/bitcoin/lib
+endif
+
 LIBS= \
  -l db_cxx \
  -l eay32 \
@@ -83,4 +90,5 @@ bitcoin.exe: headers.h.gch $(OBJS)
 
 clean:
 	-del /Q obj\*
+	-del /Q bitcoin.exe
 	-del /Q headers.h.gch

@@ -1,0 +1,17 @@
+{
+    "configurations": [
+      {
+        "name": "Windows x64",
+        "includePath": [
+          "C:\\Program Files (x86)\\Bitcoin\\include",
+          "${env.WindowsSdkDir}include\\${env.WindowsSDKVersion}\\ucrt",
+          "${env.WindowsSdkDir}include\\${env.WindowsSDKVersion}\\um",
+          "${env.WindowsSdkDir}include\\${env.WindowsSDKVersion}\\shared",
+          "${env.VCToolsInstallDir}include"
+        ],
+        "compilerSwitches": "/std:c++11",
+        "intelliSenseMode": "msvc-x64",
+        "undefines": []
+      }
+    ]
+  }
