@@ -529,7 +529,7 @@ public:
     }
 
 
-
+    //setInventoryKnown, vIntentoryToSend
     void AddInventoryKnown(const CInv& inv)
     {
         CRITICAL_BLOCK(cs_inventory)

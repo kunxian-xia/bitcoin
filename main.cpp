@@ -753,6 +753,7 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
             if (prevout.n >= txindex.vSpent.size())
                 return error("DisconnectInputs() : prevout.n out of range");
 
+			//最重要的两步: mark to be not spent and write it back to CTxDB
             // Mark outpoint as not spent
             txindex.vSpent[prevout.n].SetNull();
 
@@ -777,6 +778,14 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
         int64 nValueIn = 0;
         for (int i = 0; i < vin.size(); i++)
         {
+			//prev_out只能提供所引用交易的hash, 然后我们根据hash找到该笔交易。
+			//有两种情况：
+			// 1. 交易txPrev在active chain上：Load CTransaction from disk using the DiskPos info from CTxIndex.
+			// 2. 交易txPrev在mem pool: 
+			//class COutPoint {
+			//	uint256 hash;
+			//  unsigned int n;
+			//}
             COutPoint prevout = vin[i].prevout;
 
             // Read txindex
@@ -812,6 +821,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
             else
             {
                 // Get prev tx from disk
+				//NOTE!! 性能瓶颈点
                 if (!txPrev.ReadFromDisk(txindex.pos))
                     return error("ConnectInputs() : %s ReadFromDisk prev tx %s failed", GetHash().ToString().substr(0,6).c_str(),  prevout.hash.ToString().substr(0,6).c_str());
             }
@@ -824,6 +834,9 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
                 for (CBlockIndex* pindex = pindexBest; pindex && nBestHeight - pindex->nHeight < COINBASE_MATURITY-1; pindex = pindex->pprev)
                     if (pindex->nBlockPos == txindex.pos.nBlockPos && pindex->nFile == txindex.pos.nFile)
                         return error("ConnectInputs() : tried to spend coinbase at depth %d", nBestHeight - pindex->nHeight);
+			
+			//Q: 为什么先验证交易中的签名正确性呢？
+			// 我觉得应该先看有没有双花，然后再看签名对不对。
 
             // Verify signature
             if (!VerifySignature(txPrev, *this, i))
@@ -914,10 +927,22 @@ bool CTransaction::ClientConnectInputs()
 
 
 
-
+///////////////////////
+////// FOCUS //////////
+///////////////////////
+//逻辑: undo the effect of applying txs in CBlock
+//关联逻辑：CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex);
 bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 {
     // Disconnect in reverse order
+	// Q: 为什么要逆序
+	// A: 因为同一个区块中的交易也可能会相互引用（reference），比如tx1排在tx2的前面，即在vtx这个
+	//   vector中，tx1的index 小于 tx2的index，于是如果先把tx1's index给删掉了的话，那就在操作
+	//   tx2's index就会出现问题。
+
+	// Q: CTransaction::DisconnectInputs()是不是只需要undo mark,i.e. 
+	//    mark txindex.vSpent[prevout.n] as null, i.e. 
+	//         txindex.vSpent[prevout.n].SetNull()
     for (int i = vtx.size()-1; i >= 0; i--)
         if (!vtx[i].DisconnectInputs(txdb))
             return false;
@@ -934,6 +959,18 @@ bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
     return true;
 }
 
+//CTxDB的缺点是：对tx记录的是CTxIndex，and the transactions that spend its tx output.
+//而CTxIndex只记录了交易的物理地址，当需要查看交易的输出，还需要从磁盘去读取该交易，I/O开销大。
+/*
+ * class CTxIndex {
+ * public:
+ *  CDiskTxPos pos;
+ *  vector<CDiskTxPos> vSpent;
+ *  ...
+ * }; 
+ */
+//当我们要调用CTransaction::ConnectInputs()时，该函数需要从vin中计算出input values的总和，
+// 此时是需要遍历每一个交易，当前的实现模式下，也就意味着要Read CTransaction from the disk. 
 bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 {
     //// issue here: it doesn't know the version
@@ -946,6 +983,9 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
         CDiskTxPos posThisTx(pindex->nFile, pindex->nBlockPos, nTxPos);
         nTxPos += ::GetSerializeSize(tx, SER_DISK);
 
+		//1. 验证有没有双花,计算输入-输出的差值, nFee+= input_sum - output_sum;
+		//2. 更新utxo set: txindex.vSpent[prevout.n] = posThisTx;
+		//3. write the change back to CTxDB.
         if (!tx.ConnectInputs(txdb, mapUnused, posThisTx, pindex->nHeight, nFees, true, false))
             return false;
     }
