@@ -396,6 +396,7 @@ bool CTxDB::LoadBlockIndex()
 // CAddrDB
 //
 
+//CAddrDB stores ("addr", addrKey) -> CAddress pairs
 bool CAddrDB::WriteAddress(const CAddress& addr)
 {
     return Write(make_pair(string("addr"), addr.GetKey()), addr);

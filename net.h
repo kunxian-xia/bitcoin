@@ -462,8 +462,10 @@ public:
     // inventory based relay
     set<CInv> setInventoryKnown;
     set<CInv> setInventoryKnown2;
+
     vector<CInv> vInventoryToSend;
     CCriticalSection cs_inventory;
+
     multimap<int64, CInv> mapAskFor;
 
     // publish and subscription
@@ -473,14 +475,18 @@ public:
     CNode(SOCKET hSocketIn, CAddress addrIn, bool fInboundIn=false)
     {
         nServices = 0;
+
         hSocket = hSocketIn;
-        vSend.SetType(SER_NETWORK);
-        vRecv.SetType(SER_NETWORK);
-        nPushPos = -1;
         addr = addrIn;
-        nVersion = 0;
-        fClient = false; // set by version message
         fInbound = fInboundIn;
+
+        vSend.SetType(SER_NETWORK);//序列化使用网络序
+        vRecv.SetType(SER_NETWORK);//序列化使用网络序
+        nPushPos = -1;
+
+        nVersion = 0; //should be set by "version" message
+
+        fClient = false; // set by version message
         fNetworkNode = false;
         fDisconnect = false;
         nRefCount = 0;

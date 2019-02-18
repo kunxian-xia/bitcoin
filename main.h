@@ -47,6 +47,13 @@ extern CAddress addrIncoming;
 
 
 
+//wallet module should have :
+//1. import public key & private key
+//2. display the balance of the default keypair
+//   balance = the sum of all UTXO with scriptPubKey = defaultKey 
+//   
+//      need to keep track of the set of UTXO the owner owns
+//3. 
 
 string GetAppDir();
 bool CheckDiskSpace(int64 nAdditionalBytes=0);

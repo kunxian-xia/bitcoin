@@ -17,17 +17,24 @@ void ThreadOpenConnections2(void* parg);
 //
 // Global state variables
 //
-bool fClient = false;
-uint64 nLocalServices = (fClient ? 0 : NODE_NETWORK);
-CAddress addrLocalHost(0, DEFAULT_PORT, nLocalServices);
+bool fClient = false; //is not a client node, it's a full node 
+uint64 nLocalServices = (fClient ? 0 : NODE_NETWORK); //网络节点
+
+CAddress addrLocalHost(0, DEFAULT_PORT, nLocalServices); //address of this full node
+
 CNode nodeLocalHost(INVALID_SOCKET, CAddress("127.0.0.1", nLocalServices));
 CNode* pnodeLocalHost = &nodeLocalHost;
+
 bool fShutdown = false;
 array<bool, 10> vfThreadRunning;
+
 vector<CNode*> vNodes;
 CCriticalSection cs_vNodes;
+
+//ThreadOpenConnections() will try to connect nodes whose addr lie in mapAddresses.
 map<vector<unsigned char>, CAddress> mapAddresses;
 CCriticalSection cs_mapAddresses;
+
 map<CInv, CDataStream> mapRelay;
 deque<pair<int64, CInv> > vRelayExpiration;
 CCriticalSection cs_mapRelay;
@@ -45,12 +52,15 @@ bool ConnectSocket(const CAddress& addrConnect, SOCKET& hSocketRet)
     if (hSocket == INVALID_SOCKET)
         return false;
 
+    //ip addresses like 10.*.*.* and 192.168.*.* are not routable
     bool fRoutable = !(addrConnect.GetByte(3) == 10 || (addrConnect.GetByte(3) == 192 && addrConnect.GetByte(2) == 168));
     bool fProxy = (addrProxy.ip && fRoutable);
     struct sockaddr_in sockaddr = (fProxy ? addrProxy.GetSockAddr() : addrConnect.GetSockAddr());
 
+    //the call to connect() will block current thread
     if (connect(hSocket, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) == SOCKET_ERROR)
     {
+        //connect failed
         closesocket(hSocket);
         return false;
     }
@@ -439,11 +449,14 @@ void CNode::Disconnect()
 
 
 
+//CheckForShutDown(0) will close all sockets if fShutdown = true
+// and stop the ThreadSocketHandler
 
 
+//CheckForShutDown(1), CheckForShutDown(2)
 
 
-
+//it uses vfThreadRunning[0]
 void ThreadSocketHandler(void* parg)
 {
     IMPLEMENT_RANDOMIZE_STACK(ThreadSocketHandler(parg));

@@ -1784,6 +1784,8 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         {
             if (fShutdown)
                 return true;
+            //this is the second way to expand mapAddresses
+            //the other way is load it from addr.dat database when starts the node.
             if (AddAddress(addrdb, addr))
             {
                 // Put on lists to send to other nodes
@@ -1791,7 +1793,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 CRITICAL_BLOCK(cs_vNodes)
                     foreach(CNode* pnode, vNodes)
                         if (!pnode->setAddrKnown.count(addr))
-                            pnode->vAddrToSend.push_back(addr);
+                            pnode->vAddrToSend.push_back(addr); //broadcast to other nodes.
             }
         }
     }
